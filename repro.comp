@@ -1,0 +1,47 @@
+#version 460
+#extension GL_EXT_descriptor_heap : require
+
+layout(local_size_x = 1) in;
+
+struct Flat {
+    ivec4 a;
+    ivec4 b;
+    ivec4 c;
+    ivec4 d;
+};
+
+struct Inner {
+    ivec4 a;
+    ivec4 b;
+};
+
+struct Nested {
+    Inner a;
+    Inner b;
+};
+
+layout(descriptor_heap) uniform FlatBuffer {
+    Flat value;
+} flatBuffers[];
+
+layout(descriptor_heap) uniform NestedBuffer {
+    Nested value;
+} nestedBuffers[];
+
+layout(descriptor_heap) buffer OutputBuffer {
+    ivec4 values[8];
+} outputBuffers[];
+
+void main()
+{
+    Flat localFlat = flatBuffers[0].value;
+    Nested localNested = nestedBuffers[1].value;
+    outputBuffers[2].values[0] = localFlat.a;
+    outputBuffers[2].values[1] = localFlat.b;
+    outputBuffers[2].values[2] = localFlat.c;
+    outputBuffers[2].values[3] = localFlat.d;
+    outputBuffers[2].values[4] = localNested.a.a;
+    outputBuffers[2].values[5] = localNested.a.b;
+    outputBuffers[2].values[6] = localNested.b.a;
+    outputBuffers[2].values[7] = localNested.b.b;
+}
